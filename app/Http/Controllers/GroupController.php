@@ -95,8 +95,4 @@ class GroupController extends Controller
     protected function joinCreate(array $data) {
         return GroupUserMaps::create($data);
     }
-
-    public function test() {
-
-    }
 }
