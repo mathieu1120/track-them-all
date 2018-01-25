@@ -70,4 +70,18 @@ class RegisterController extends Controller
             'password' => bcrypt($data['password']),
         ]);
     }
+
+    public function register(Request $request) {
+        $validator = $this->validator($request->all());
+        if ($validator->fails()) {
+            return new JsonResponse($validator->getMessageBag()->getMessages(), JsonResponse::HTTP_BAD_REQUEST);
+        }
+        if ($user = $this->create($request->all())) {
+            return new JsonResponse([
+                'success' => true,
+                'token'   => $user->createToken('Token Name')->accessToken
+            ], JsonResponse::HTTP_OK);
+        }
+        return new JsonResponse(['success' => false], JsonResponse::HTTP_BAD_REQUEST);
+    }
 }

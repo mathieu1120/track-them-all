@@ -12,10 +12,7 @@ use Illuminate\Http\Request;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
-Route::post('/register', [
-    'uses' => 'Auth\RegisterController@register'
-]);
+Route::post('register', 'Auth\RegisterController@register');
 
 // list of groups for a user first, if no user, get public group sorted by favorites
 Route::get('/groups', [
