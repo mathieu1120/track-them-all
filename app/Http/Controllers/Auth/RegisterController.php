@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Support\Facades\Auth;
 
 class RegisterController extends Controller
 {
@@ -50,8 +51,7 @@ class RegisterController extends Controller
     protected function validator(array $data)
     {
         return Validator::make($data, [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'email' => 'required|string|email|max:255',
             'password' => 'required|string|min:6',
         ]);
     }
@@ -65,7 +65,6 @@ class RegisterController extends Controller
     protected function create(array $data)
     {
         return User::create([
-            'name' => $data['name'],
             'email' => $data['email'],
             'password' => bcrypt($data['password']),
         ]);
@@ -76,6 +75,21 @@ class RegisterController extends Controller
         if ($validator->fails()) {
             return new JsonResponse($validator->getMessageBag()->getMessages(), JsonResponse::HTTP_BAD_REQUEST);
         }
+
+        if (User::where(['email' => $request->post('email')])->first()) {
+            if (Auth::attempt([
+                'email' => $request->post('email'),
+                'password' => $request->post('password')
+            ])
+            ) {
+                return new JsonResponse([
+                    'success' => true,
+                    'token' => Auth::user()->createToken('Token Name')->accessToken
+                ], JsonResponse::HTTP_OK);
+            }
+            return new JsonResponse(['success' => false], JsonResponse::HTTP_BAD_REQUEST);
+        }
+
         if ($user = $this->create($request->all())) {
             return new JsonResponse([
                 'success' => true,
